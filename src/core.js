@@ -44,7 +44,7 @@ export class Point {
  */
 export class DrawState {
   /**
-   * Creates a draw DrawState
+   * Creates a DrawState
    * @param {CanvasRenderingContext2D} ctx
    * @param {HTMLCanvasElement} canvas
    */
