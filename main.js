@@ -23,6 +23,8 @@ class DrawState {
   constructor() {
     /** @type {boolean} */
     this.isDrawing = false;
+    /** @type {Point | null} */
+    this.currentPoint = null;
     /** @type {[]Point} */
     this.points = [];
   }
@@ -50,6 +52,13 @@ class DrawState {
   }
 
   /**
+   * @param {Point} point
+   */
+  setCurrentPoint(point) {
+    this.currentPoint = point;
+  }
+
+  /**
    * @param {HTMLCanvasElement} canvas
    * @param {CanvasRenderingContext2D} ctx
    * @param {Point} point
@@ -59,10 +68,8 @@ class DrawState {
       console.log("ctx is undefined");
       return;
     }
-    ctx.beginPath();
-    ctx.arc(point.x, point.y, 2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.closePath();
+    ctx.lineTo(point.x, point.y);
+    ctx.stroke();
   }
 }
 
@@ -97,20 +104,24 @@ function initialize() {
   document.addEventListener("mousedown", (e) => {
     if (e.target.id === "drawArea") {
       drawState.setIsDrawing(true);
+      ctx.beginPath();
     }
     if (e.target.id === "clearPoints") {
       drawState.clearPoints();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
   });
 
   document.addEventListener("mouseup", () => {
     drawState.setIsDrawing(false);
+    ctx.closePath();
   });
 
   document.addEventListener("mousemove", (e) => {
     if (drawState.isDrawing) {
       const point = drawState.addPoint(e.x, e.y);
       drawState.renderPoint(ctx, point);
+      drawState.setCurrentPoint(point);
     }
   });
 }
@@ -120,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.querySelector("#app").innerHTML = `
-  <canvas id="drawArea" class="bg-red-200 h-full w-full"></canvas>
+  <canvas id="drawArea" class="h-full w-full"></canvas>
   <div id="controls" class="absolute left-2 top-2"></div>
 `;
 
