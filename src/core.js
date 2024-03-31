@@ -1,4 +1,5 @@
 //@ts-check
+import { Colour } from "./colour.js";
 
 /**
  * A point that will be drawn
@@ -8,8 +9,8 @@ export class Point {
    * Creates a point
    * @param {number} x
    * @param {number} y
-   * @param {string} lineColour
-   * @param {string} fillColour
+   * @param {Colour} lineColour
+   * @param {Colour} fillColour
    * @param {number} lineWidth
    * @param {boolean} lineStart
    * @param {boolean} lineEnd
@@ -19,9 +20,9 @@ export class Point {
     this.x = x;
     /** @type {number} */
     this.y = y;
-    /** @type {string} */
+    /** @type {Colour} */
     this.strokeColour = lineColour;
-    /** @type {string} */
+    /** @type {Colour} */
     this.fillColour = fillColour;
     /** @type {number} */
     this.lineWidth = lineWidth;
@@ -69,15 +70,15 @@ export class DrawState {
     /** @type {number} */
     this.lineWidth = 5;
     if (this.darkMode.matches) {
-      /** @type {string} */
-      this.strokeColour = "white";
-      /** @type {string} */
-      this.fillColour = "white";
+      /** @type {Colour} */
+      this.strokeColour = new Colour(0, 100, 100, 1);
+      /** @type {Colour} */
+      this.fillColour = new Colour(0, 100, 100, 1);
     } else {
-      /** @type {string} */
-      this.strokeColour = "black";
-      /** @type {string} */
-      this.fillColour = "black";
+      /** @type {Colour} */
+      this.strokeColour = new Colour(360, 1, 1, 1);
+      /** @type {Colour} */
+      this.fillColour = new Colour(360, 1, 1, 1);
     }
   }
 
@@ -131,11 +132,11 @@ export class DrawState {
     if (point.strokeColour !== this.strokeColour) {
       this.strokeColour = point.strokeColour;
     }
-    this.ctx.strokeStyle = this.strokeColour;
+    this.ctx.strokeStyle = this.strokeColour.getHslaString();
     if (point.fillColour !== this.fillColour) {
       this.fillColour = point.fillColour;
     }
-    this.ctx.fillStyle = this.fillColour;
+    this.ctx.fillStyle = this.fillColour.getHslaString();
     if (this.lineWidth !== point.lineWidth) {
       this.lineWidth = point.lineWidth;
     }
@@ -143,14 +144,14 @@ export class DrawState {
   }
 
   /**
-   * @param {string} colour
+   * @param {Colour} colour
    */
   setStrokeColour(colour) {
     this.strokeColour = colour;
   }
 
   /**
-   * @param {string} colour
+   * @param {Colour} colour
    */
   setFillColour(colour) {
     this.fillColour = colour;

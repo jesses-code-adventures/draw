@@ -1,6 +1,7 @@
 //@ts-check
 
 import { DrawState } from "./core.js";
+import { ColourSelector } from "./colourSelector.js";
 
 class WindowSize {
   constructor() {
@@ -122,11 +123,31 @@ function controls() {
   if (!controls) {
     throw new Error("controls not found");
   }
+  const strokeColourSelector = new ColourSelector(
+    "strokeColourSelectorContainer",
+  );
+  document.addEventListener("click", (e) => {
+    if (!e.target) {
+      return;
+    }
+    if (!(e.target instanceof HTMLElement)) {
+      return;
+    }
+    if (e.target.id === "showStrokeColourSelector") {
+      console.log("showStrokeColourSelector pressed");
+      strokeColourSelector.setVisibility(!strokeColourSelector.visible);
+    }
+  });
   controls.innerHTML = `
   <div class="grid grid-cols-2 gap-2">
     <button id="clearPoints">clear</button>
+    <div id="strokeButtonAndSelector" class="flex flex-col w-full"></div>
+      <button id="showStrokeColourSelector">stroke</button>
+      <div id="strokeColourSelectorContainer" class="w-32"></div>
+    </div>
   </div>
     `;
+  strokeColourSelector.render();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
