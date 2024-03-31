@@ -1,12 +1,19 @@
 // @ts-check
 import { Colour } from "./colour.js";
 
+/**
+ * @callback setColourCallback
+ * @param {Colour} colour
+ */
+
 export class ColourSelector {
   /**
    * @param {string} parent
+   * @param {setColourCallback} setColour
+   * @param {string} iconLocation
    */
-  constructor(parent) {
-    /** @type {parent} */
+  constructor(parent, setColour, iconLocation) {
+    /** @type {string} */
     this.elementName = parent;
     /** @type {number} */
     this.selectedHue = 180;
@@ -17,7 +24,7 @@ export class ColourSelector {
     /** @type {number} */
     this.selectedAlpha = 1;
     /** @type{boolean} */
-    this.visible = true;
+    this.visible = false;
     /** @type {Colour} */
     this.colour = new Colour(
       this.selectedHue,
@@ -25,6 +32,11 @@ export class ColourSelector {
       this.selectedLightness,
       this.selectedAlpha,
     );
+    /** @type {function(Colour):void} */
+    // @ts-expect-error
+    this.setColour = setColour;
+    /** @type {string} */
+    this.iconLocation = iconLocation;
   }
 
   /**
@@ -33,6 +45,8 @@ export class ColourSelector {
   setHue(hue) {
     this.selectedHue = hue;
     this.colour.setHue(hue);
+    // @ts-expect-error
+    this.setColour(this.colour);
     this.renderColourDisplay();
   }
 
@@ -42,6 +56,8 @@ export class ColourSelector {
   setSaturation(saturation) {
     this.selectedSaturation = saturation;
     this.colour.setSaturation(saturation);
+    // @ts-expect-error
+    this.setColour(this.colour);
     this.renderColourDisplay();
   }
 
@@ -51,6 +67,8 @@ export class ColourSelector {
   setLightness(lightness) {
     this.selectedLightness = lightness;
     this.colour.setLightness(lightness);
+    // @ts-expect-error
+    this.setColour(this.colour);
     this.renderColourDisplay();
   }
 
@@ -60,6 +78,8 @@ export class ColourSelector {
   setAlpha(alpha) {
     this.selectedAlpha = alpha;
     this.colour.setAlpha(alpha);
+    // @ts-expect-error
+    this.setColour(this.colour);
     this.renderColourDisplay();
   }
 
@@ -105,6 +125,8 @@ export class ColourSelector {
         }
         this.setHue(Number(event.target.value));
       });
+    } else {
+      console.log("Hue not found");
     }
     const saturation = document.querySelector(`#${inputIds.saturationId}`);
     if (saturation) {
@@ -158,7 +180,8 @@ export class ColourSelector {
   }
 
   renderColourDisplay() {
-    this.colour.render(this.getColourDisplayId()).outerHTML;
+    const displayId = this.getColourDisplayId();
+    this.colour.render(displayId).outerHTML;
   }
 
   getColourDisplayId() {
@@ -173,29 +196,35 @@ export class ColourSelector {
     if (!(element instanceof HTMLElement)) {
       throw new Error(`Element not found ${this.elementName}`);
     }
-    if (!this.visible) {
-      element.hidden = true;
-    } else {
-      element.hidden = false;
-    }
     const ids = this.getIds();
-    element.innerHTML = `
-    <div id="colourSelectorContainer" class="flex flex-col w-full border-2 dark:border-white border-black p-2 absolute" >
-        <div id="sliderContainer" class="flex flex-col w-full items-center text-center">
+    const selectorContainer = document.createElement("div");
+    selectorContainer.id = `${this.elementName}-selectorContainer`;
+    selectorContainer.innerHTML = `
+    <div id="colourSelectorContainer" class="flex flex-col border-0 dark:bg-zinc-800 dark:border-white border-black p-1 relative items-center" >
+        <div id="sliderContainer" class="flex flex-col items-center text-center">
           <label for="${ids.hueId}">Hue</label>
-          <input type="range" id="${ids.hueId}" min="0" max="360" value="${this.selectedHue}" />
+          <input class="w-3/8" type="range" id="${ids.hueId}" min="0" max="360" value="${this.selectedHue}" />
           <label for="${ids.saturationId}">Saturation</label>
-          <input type="range" id="${ids.saturationId}" min="0" max="100" value="${this.selectedSaturation}" />
+          <input class="w-3/8" type="range" id="${ids.saturationId}" min="0" max="100" value="${this.selectedSaturation}" />
           <label for="${ids.lightnessId}">Lightness</label>
-          <input type="range" id="${ids.lightnessId}" min="0" max="100" value="${this.selectedLightness}" />
+          <input class="w-3/8" type="range" id="${ids.lightnessId}" min="0" max="100" value="${this.selectedLightness}" />
           <label for="${ids.alphaId}">Alpha</label>
-          <input type="range" id="${ids.alphaId}" min="0" max="1" step="0.01" value="${this.selectedAlpha}" />
+          <input class="w-3/8" type="range" id="${ids.alphaId}" min="0" max="1" step="0.01" value="${this.selectedAlpha}" />
         </div>
-        <div id="${ids.colourDisplay}" class="border-2 border-red-300 h-12">
+        <div id="${ids.colourDisplay}" class="border-2 border-red-300 h-12 w-1/2 rounded-full">
         </div>
       </div>
     `;
+    if (!this.visible) {
+      selectorContainer.hidden = true;
+    } else {
+      selectorContainer.hidden = false;
+    }
+    element.innerHTML = `
+      <img id="showStrokeColourSelector" src="${this.iconLocation}" class="w-8 h-8 text-white dark:bg-white invert" />
+      ${selectorContainer.outerHTML}
+    `;
+    this.addListeners(); // Has to go here so that the preceding elements have been renderered already
     this.renderColourDisplay();
-    this.addListeners();
   }
 }

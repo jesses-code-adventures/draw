@@ -1,155 +1,123 @@
 //@ts-check
 
-import { DrawState } from "./core.js";
+import { WindowSize, DrawState } from "./core.js";
 import { ColourSelector } from "./colourSelector.js";
 
-class WindowSize {
+document.addEventListener("DOMContentLoaded", () => {
+  new App();
+});
+
+class App {
   constructor() {
-    /** @type {number} */
-    this.height = window.outerHeight;
-    /** @type {number} */
-    this.width = window.outerWidth;
-    /** @type {number} */
-    this.innerHeight = window.innerHeight;
-    /** @type {number} */
-    this.innerWidth = window.innerWidth;
-  }
-
-  /**
-   * Handle the resize event
-   * @param {DrawState} drawState
-   */
-  resize(drawState) {
-    this.height = window.outerHeight;
-    this.width = window.outerWidth;
-    this.innerHeight = window.innerHeight;
-    this.innerWidth = window.innerWidth;
-    drawState.canvas.width = this.innerWidth;
-    drawState.canvas.height = this.innerHeight;
-    drawState.canvas.style.width = this.innerWidth + "px";
-    drawState.canvas.style.height = this.innerHeight + "px";
-    const scale =
-      window.devicePixelRatio ||
-      window.screen.availWidth / document.documentElement.clientWidth;
-    drawState.canvas.width *= scale;
-    drawState.canvas.height *= scale;
-    drawState.ctx.scale(scale, scale);
-    drawState.rerender();
-  }
-}
-
-/**
- * set up the interactivity
- * call when the dom content is loaded
- * @private
- */
-function attach() {
-  // @type {HTMLCanvasElement}
-  const canvas = document.querySelector("#drawArea");
-  if (!(canvas instanceof HTMLCanvasElement)) {
-    throw new Error("Canvas element not found");
-  }
-  // @type {CanvasRenderingContext2D}
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    throw new Error("ctx not found");
-  }
-  const windowSize = new WindowSize();
-  const drawState = new DrawState(ctx, canvas);
-  windowSize.resize(drawState);
-  if (!window.visualViewport) {
-    throw new Error("visualViewport not found");
-  }
-  window.visualViewport.addEventListener(
-    "resize",
-    () => {
-      windowSize.resize(drawState);
-    },
-    false,
-  );
-  // Drawing events
-  document.addEventListener("mousedown", (e) => {
-    if (!e.target) {
-      return;
+    /** @type {MediaQueryList} */
+    this.darkMode = window.matchMedia("(prefers-color-scheme: dark)");
+    const app = document.querySelector("#app");
+    if (!app) {
+      throw new Error("app not found");
     }
-    if (!(e.target instanceof HTMLElement)) {
-      return;
-    }
-    if (e.target.id === "drawArea") {
-      drawState.setIsDrawing(true);
-      drawState.addPoint(e.x, e.y, true, false);
-    }
-    if (e.target.id === "clearPoints") {
-      drawState.clearPoints();
-    }
-  });
-  document.addEventListener("mouseup", (e) => {
-    if (drawState.isDrawing) {
-      drawState.addPoint(e.x, e.y, false, true);
-      drawState.setIsDrawing(false);
-    }
-  });
-  document.addEventListener("mousemove", (e) => {
-    if (drawState.isDrawing) {
-      drawState.addPoint(e.x, e.y, false, false);
-    }
-  });
-}
-
-/**
- * Set up the app
- * @private
- * @throws {Error} app not found
- */
-function app() {
-  const app = document.querySelector("#app");
-  if (!app) {
-    throw new Error("app not found");
-  }
-  app.innerHTML = `
+    app.innerHTML = `
     <canvas id="drawArea" class="h-full w-full overflow-hidden"></canvas>
     <div id="controls" class="absolute left-2 top-2"></div>
   `;
-  controls();
-}
-
-/**
- * Set up the controls
- * @private
- * @throws {Error} controls not found
- */
-function controls() {
-  const controls = document.querySelector("#controls");
-  if (!controls) {
-    throw new Error("controls not found");
+    this.canvas = document.querySelector("#drawArea");
+    if (!(this.canvas instanceof HTMLCanvasElement)) {
+      throw new Error("Canvas element not found");
+    }
+    // @type {CanvasRenderingContext2D}
+    this.ctx = this.canvas.getContext("2d");
+    if (!this.ctx) {
+      throw new Error("ctx not found");
+    }
+    this.windowSize = new WindowSize();
+    this.drawState = new DrawState(this.ctx, this.canvas, this.darkMode);
+    this.windowSize.resize(this.drawState);
+    this.addListeners();
+    this.render_controls();
   }
-  const strokeColourSelector = new ColourSelector(
-    "strokeColourSelectorContainer",
-  );
-  document.addEventListener("click", (e) => {
-    if (!e.target) {
-      return;
+
+  /**
+   * set up the interactivity
+   * call when the dom content is loaded
+   * @private
+   */
+  addListeners() {
+    if (!window.visualViewport) {
+      throw new Error("visualViewport not found");
     }
-    if (!(e.target instanceof HTMLElement)) {
-      return;
+    // @type {HTMLCanvasElement}
+    window.visualViewport.addEventListener(
+      "resize",
+      () => {
+        this.windowSize.resize(this.drawState);
+      },
+      false,
+    );
+    // Drawing events
+    document.addEventListener("mousedown", (e) => {
+      if (!e.target) {
+        return;
+      }
+      if (!(e.target instanceof HTMLElement)) {
+        console.log("Not an html element");
+        return;
+      }
+      if (e.target.id === "drawArea") {
+        this.drawState.setIsDrawing(true);
+        this.drawState.addPoint(e.x, e.y, true, false);
+      }
+      if (e.target.id === "clearPoints") {
+        this.drawState.clearPoints();
+      }
+    });
+    document.addEventListener("mouseup", () => {
+      if (this.drawState.isDrawing) {
+        const lastPoint = this.drawState.getLastPoint();
+        if (lastPoint) {
+          lastPoint.setLineEnd(true);
+        }
+        this.drawState.setIsDrawing(false);
+      }
+    });
+    document.addEventListener("mousemove", (e) => {
+      if (this.drawState.isDrawing) {
+        this.drawState.addPoint(e.x, e.y, false, false);
+      }
+    });
+  }
+
+  /**
+   * Set up the controls
+   * @private
+   * @throws {Error} controls not found
+   */
+  render_controls() {
+    const controls = document.querySelector("#controls");
+    if (!controls) {
+      throw new Error("controls not found");
     }
-    if (e.target.id === "showStrokeColourSelector") {
-      strokeColourSelector.setVisibility(!strokeColourSelector.visible);
-    }
-  });
-  controls.innerHTML = `
-  <div class="grid grid-cols-2 gap-2 w-36">
-    <button id="clearPoints">clear</button>
-    <div id="strokeButtonAndSelector" class="flex flex-col w-full"></div>
-      <button id="showStrokeColourSelector">stroke</button>
-      <div id="strokeColourSelectorContainer" class="w-32"></div>
+    document.addEventListener("click", (e) => {
+      if (!e.target) {
+        return;
+      }
+      if (!(e.target instanceof HTMLElement)) {
+        return;
+      }
+      if (e.target.id === "showStrokeColourSelector") {
+        strokeColourSelector.setVisibility(!strokeColourSelector.visible);
+      }
+    });
+    controls.innerHTML = `
+  <div class="grid grid-cols-2 w-36 p-4">
+    <img id="clearPoints" src="clean_dark.png" alt="clear" class="w-8 h-8 text-white dark:bg-white invert" />
+    <div id="strokeButtonAndSelector" class="flex flex-row w-full">
     </div>
   </div>
     `;
-  strokeColourSelector.render();
+    const strokeColourSelector = new ColourSelector(
+      "strokeButtonAndSelector",
+      (colour) => this.drawState.setStrokeColour(colour),
+      "stroke_colour_dark.png",
+    );
+    strokeColourSelector.render();
+  }
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  app();
-  attach();
-});

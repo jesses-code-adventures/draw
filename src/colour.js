@@ -80,7 +80,13 @@ export class Colour {
    * @returns {HTMLElement}
    */
   render(elementName) {
+    if (!elementName) {
+      throw new Error("Element name not provided");
+    }
     const element = document.getElementById(elementName);
+    if (!element) {
+      throw new Error(`Element not found ${elementName}`);
+    }
     element.style.backgroundColor = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${this.alpha})`;
     return element;
   }

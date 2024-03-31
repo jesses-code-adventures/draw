@@ -1,4 +1,5 @@
 //@ts-check
+import { walk } from "nuejs-core/ssr/fn.js";
 import { Colour } from "./colour.js";
 
 /**
@@ -53,8 +54,9 @@ export class DrawState {
    * Creates a DrawState
    * @param {CanvasRenderingContext2D} ctx
    * @param {HTMLCanvasElement} canvas
+   * @param {MediaQueryList} darkMode
    */
-  constructor(ctx, canvas) {
+  constructor(ctx, canvas, darkMode) {
     /** @type {boolean} */
     this.isDrawing = false;
     /** @type {Map.<string, Point>} */
@@ -65,11 +67,9 @@ export class DrawState {
     this.ctx = ctx;
     /** @type {HTMLCanvasElement} */
     this.canvas = canvas;
-    /** @type {MediaQueryList} */
-    this.darkMode = window.matchMedia("(prefers-color-scheme: dark)");
     /** @type {number} */
     this.lineWidth = 5;
-    if (this.darkMode.matches) {
+    if (darkMode.matches) {
       /** @type {Colour} */
       this.strokeColour = new Colour(0, 100, 100, 1);
       /** @type {Colour} */
@@ -105,8 +105,18 @@ export class DrawState {
     const point = new Point(
       x,
       y,
-      this.strokeColour,
-      this.fillColour,
+      new Colour(
+        this.strokeColour.hue,
+        this.strokeColour.saturation,
+        this.strokeColour.lightness,
+        this.strokeColour.alpha,
+      ),
+      new Colour(
+        this.fillColour.hue,
+        this.fillColour.saturation,
+        this.fillColour.lightness,
+        this.fillColour.alpha,
+      ),
       this.lineWidth,
       lineStart,
       lineEnd,
@@ -125,22 +135,19 @@ export class DrawState {
     return this.points.get(this.drawOrder[this.drawOrder.length - 1]);
   }
 
+  syncColours() {
+    this.ctx.strokeStyle = this.strokeColour.getHslaString();
+    this.ctx.fillStyle = this.fillColour.getHslaString();
+    this.ctx.lineWidth = this.lineWidth;
+  }
+
   /**
    * @param {Point} point
    */
-  syncColours(point) {
-    if (point.strokeColour !== this.strokeColour) {
-      this.strokeColour = point.strokeColour;
-    }
-    this.ctx.strokeStyle = this.strokeColour.getHslaString();
-    if (point.fillColour !== this.fillColour) {
-      this.fillColour = point.fillColour;
-    }
-    this.ctx.fillStyle = this.fillColour.getHslaString();
-    if (this.lineWidth !== point.lineWidth) {
-      this.lineWidth = point.lineWidth;
-    }
-    this.ctx.lineWidth = this.lineWidth;
+  syncColoursWithPoint(point) {
+    this.ctx.strokeStyle = point.strokeColour.getHslaString();
+    this.ctx.fillStyle = point.fillColour.getHslaString();
+    this.ctx.lineWidth = point.lineWidth;
   }
 
   /**
@@ -148,6 +155,7 @@ export class DrawState {
    */
   setStrokeColour(colour) {
     this.strokeColour = colour;
+    this.syncColours();
   }
 
   /**
@@ -174,23 +182,60 @@ export class DrawState {
       return;
     }
     if (point.lineStart) {
-      this.ctx.moveTo(point.x, point.y);
+      this.ctx.beginPath();
     }
-    this.syncColours(point);
     this.ctx.lineTo(point.x, point.y);
     this.ctx.lineJoin = "round";
     this.ctx.lineCap = "round";
     this.ctx.stroke();
+    if (point.lineEnd) {
+      this.ctx.closePath();
+    }
   }
 
   rerender() {
     for (let i = 0; i < this.points.size; i++) {
       const point = this.points.get(this.drawOrder[i]);
       if (!point) {
-        console.log("point is undefined");
         continue;
       }
+      this.syncColoursWithPoint(point);
       this.renderPoint(point);
     }
+  }
+}
+
+export class WindowSize {
+  constructor() {
+    /** @type {number} */
+    this.height = window.outerHeight;
+    /** @type {number} */
+    this.width = window.outerWidth;
+    /** @type {number} */
+    this.innerHeight = window.innerHeight;
+    /** @type {number} */
+    this.innerWidth = window.innerWidth;
+  }
+
+  /**
+   * Handle the resize event
+   * @param {DrawState} drawState
+   */
+  resize(drawState) {
+    this.height = window.outerHeight;
+    this.width = window.outerWidth;
+    this.innerHeight = window.innerHeight;
+    this.innerWidth = window.innerWidth;
+    drawState.canvas.width = this.innerWidth;
+    drawState.canvas.height = this.innerHeight;
+    drawState.canvas.style.width = this.innerWidth + "px";
+    drawState.canvas.style.height = this.innerHeight + "px";
+    const scale =
+      window.devicePixelRatio ||
+      window.screen.availWidth / document.documentElement.clientWidth;
+    drawState.canvas.width *= scale;
+    drawState.canvas.height *= scale;
+    drawState.ctx.scale(scale, scale);
+    drawState.rerender();
   }
 }
