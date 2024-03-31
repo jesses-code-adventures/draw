@@ -143,6 +143,27 @@ export class DrawState {
   }
 
   /**
+   * @param {string} colour
+   */
+  setStrokeColour(colour) {
+    this.strokeColour = colour;
+  }
+
+  /**
+   * @param {string} colour
+   */
+  setFillColour(colour) {
+    this.fillColour = colour;
+  }
+
+  /**
+   * @param {number} width
+   */
+  setLineWidth(width) {
+    this.width = width;
+  }
+
+  /**
    * @param {Point} point
    * @private
    */
