@@ -61,9 +61,19 @@ class App {
         console.log("Not an html element");
         return;
       }
+      if (e.button === 2 || (e.button === 0 && (e.ctrlKey || e.metaKey))) {
+        if (!(e.target instanceof HTMLElement)) {
+          console.log("Not an html element");
+          return;
+        }
+        if (e.target.id === "drawArea") {
+          this.drawState.addPoint(e.x, e.y, false, false, true);
+        }
+        return;
+      }
       if (e.target.id === "drawArea") {
         this.drawState.setIsDrawing(true);
-        this.drawState.addPoint(e.x, e.y, true, false);
+        this.drawState.addPoint(e.x, e.y, true, false, false);
       }
       if (e.target.id === "clearPoints") {
         this.drawState.clearPoints();
@@ -80,8 +90,11 @@ class App {
     });
     document.addEventListener("mousemove", (e) => {
       if (this.drawState.isDrawing) {
-        this.drawState.addPoint(e.x, e.y, false, false);
+        this.drawState.addPoint(e.x, e.y, false, false, false);
       }
+    });
+    document.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
     });
   }
 
@@ -102,15 +115,20 @@ class App {
       if (!(e.target instanceof HTMLElement)) {
         return;
       }
-      if (e.target.id === "showStrokeColourSelector") {
+      console.log(e.target.id);
+      if (e.target.id === "strokeButtonAndSelector-colourSelectorButton") {
         strokeColourSelector.setVisibility(!strokeColourSelector.visible);
+      }
+      if (e.target.id === "fillButtonAndSelector-colourSelectorButton") {
+        fillColourSelector.setVisibility(!fillColourSelector.visible);
       }
     });
     controls.innerHTML = `
-  <div class="grid grid-cols-2 w-36 p-4">
-    <img id="clearPoints" src="clean_dark.png" alt="clear" class="w-8 h-8 text-white dark:bg-white invert" />
-    <div id="strokeButtonAndSelector" class="flex flex-row w-full">
-    </div>
+  <div class="grid grid-cols-2 w-24 gap-4">
+    <img id="clearPoints" src="clean_dark.png" alt="clear" class="w-8 h-8 text-white dark:bg-white invert " />
+    <div id="strokeButtonAndSelector" class="flex flex-row w-full "></div>
+    <div id="placeholder" class="">hi</div>
+    <div id="fillButtonAndSelector" class="flex flex-row w-full "></div>
   </div>
     `;
     const strokeColourSelector = new ColourSelector(
@@ -118,6 +136,12 @@ class App {
       (colour) => this.drawState.setStrokeColour(colour),
       "stroke_colour_dark.png",
     );
+    const fillColourSelector = new ColourSelector(
+      "fillButtonAndSelector",
+      (colour) => this.drawState.setFillColour(colour),
+      "fill_colour_dark.png",
+    );
     strokeColourSelector.render();
+    fillColourSelector.render();
   }
 }

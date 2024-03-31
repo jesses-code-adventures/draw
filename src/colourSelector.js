@@ -200,8 +200,8 @@ export class ColourSelector {
     const selectorContainer = document.createElement("div");
     selectorContainer.id = `${this.elementName}-selectorContainer`;
     selectorContainer.innerHTML = `
-    <div id="colourSelectorContainer" class="flex flex-col border-0 dark:bg-zinc-800 dark:border-white border-black p-1 relative items-center" >
-        <div id="sliderContainer" class="flex flex-col items-center text-center">
+    <div id="${this.elementName}-colourSelectorContainer" class="flex flex-col border-0 dark:bg-zinc-800 dark:border-white border-black p-1 relative items-center" >
+        <div id="${this.elementName}-sliderContainer" class="flex flex-col items-center text-center">
           <label for="${ids.hueId}">Hue</label>
           <input class="w-3/8" type="range" id="${ids.hueId}" min="0" max="360" value="${this.selectedHue}" />
           <label for="${ids.saturationId}">Saturation</label>
@@ -221,7 +221,7 @@ export class ColourSelector {
       selectorContainer.hidden = false;
     }
     element.innerHTML = `
-      <img id="showStrokeColourSelector" src="${this.iconLocation}" class="w-8 h-8 text-white dark:bg-white invert" />
+      <img id="${this.elementName}-colourSelectorButton" src="${this.iconLocation}" class="w-8 h-8 text-white dark:bg-white invert" />
       ${selectorContainer.outerHTML}
     `;
     this.addListeners(); // Has to go here so that the preceding elements have been renderered already
