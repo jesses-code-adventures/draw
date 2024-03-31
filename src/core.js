@@ -12,8 +12,9 @@ export class Point {
    * @param {string} fillColour
    * @param {number} lineWidth
    * @param {boolean} lineStart
+   * @param {boolean} lineEnd
    */
-  constructor(x, y, lineColour, fillColour, lineWidth, lineStart) {
+  constructor(x, y, lineColour, fillColour, lineWidth, lineStart, lineEnd) {
     /** @type {number} */
     this.x = x;
     /** @type {number} */
@@ -25,9 +26,9 @@ export class Point {
     /** @type {number} */
     this.lineWidth = lineWidth;
     /** @type {boolean} */
-    this.lineEnd = false;
-    /** @type {boolean} */
     this.lineStart = lineStart;
+    /** @type {boolean} */
+    this.lineEnd = lineEnd;
   }
 
   /**
@@ -35,6 +36,10 @@ export class Point {
    */
   setLineEnd(value) {
     this.lineEnd = value;
+  }
+
+  getKey() {
+    return `${this.x}::${this.y}`;
   }
 }
 
@@ -51,8 +56,10 @@ export class DrawState {
   constructor(ctx, canvas) {
     /** @type {boolean} */
     this.isDrawing = false;
-    /** @type {Array.<Point>} */
-    this.points = [];
+    /** @type {Map.<string, Point>} */
+    this.points = new Map();
+    /** @type {Array.<string>} */
+    this.drawOrder = [];
     /** @type {CanvasRenderingContext2D} */
     this.ctx = ctx;
     /** @type {HTMLCanvasElement} */
@@ -91,8 +98,9 @@ export class DrawState {
    * @param {number} x
    * @param {number} y
    * @param {boolean} lineStart
+   * @param {boolean} lineEnd
    */
-  addPoint(x, y, lineStart) {
+  addPoint(x, y, lineStart, lineEnd) {
     const point = new Point(
       x,
       y,
@@ -100,18 +108,20 @@ export class DrawState {
       this.fillColour,
       this.lineWidth,
       lineStart,
+      lineEnd,
     );
-    this.points.push(point);
+    this.points.set(point.getKey(), point);
+    this.drawOrder.push(point.getKey());
     this.renderPoint(point);
   }
 
   clearPoints() {
-    this.points = [];
+    this.points.clear();
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   getLastPoint() {
-    return this.points[this.points.length - 1];
+    return this.points.get(this.drawOrder[this.drawOrder.length - 1]);
   }
 
   /**
@@ -141,10 +151,10 @@ export class DrawState {
       console.log("ctx is undefined");
       return;
     }
-    this.syncColours(point);
     if (point.lineStart) {
       this.ctx.moveTo(point.x, point.y);
     }
+    this.syncColours(point);
     this.ctx.lineTo(point.x, point.y);
     this.ctx.lineJoin = "round";
     this.ctx.lineCap = "round";
@@ -152,8 +162,13 @@ export class DrawState {
   }
 
   rerender() {
-    for (let i = 0; i < this.points.length; i++) {
-      this.renderPoint(this.points[i]);
+    for (let i = 0; i < this.points.size; i++) {
+      const point = this.points.get(this.drawOrder[i]);
+      if (!point) {
+        console.log("point is undefined");
+        continue;
+      }
+      this.renderPoint(point);
     }
   }
 }

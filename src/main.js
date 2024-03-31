@@ -40,8 +40,9 @@ class WindowSize {
 /**
  * set up the interactivity
  * call when the dom content is loaded
+ * @private
  */
-function initialize() {
+function attach() {
   // @type {HTMLCanvasElement}
   const canvas = document.querySelector("#drawArea");
   if (!(canvas instanceof HTMLCanvasElement)) {
@@ -75,44 +76,60 @@ function initialize() {
     }
     if (e.target.id === "drawArea") {
       drawState.setIsDrawing(true);
-      drawState.addPoint(e.x, e.y, true);
+      drawState.addPoint(e.x, e.y, true, false);
     }
     if (e.target.id === "clearPoints") {
       drawState.clearPoints();
     }
   });
-  document.addEventListener("mouseup", () => {
+  document.addEventListener("mouseup", (e) => {
     if (drawState.isDrawing) {
+      drawState.addPoint(e.x, e.y, false, true);
       drawState.setIsDrawing(false);
-      drawState.getLastPoint().setLineEnd(true);
     }
   });
   document.addEventListener("mousemove", (e) => {
     if (drawState.isDrawing) {
-      drawState.addPoint(e.x, e.y, false);
+      drawState.addPoint(e.x, e.y, false, false);
     }
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  initialize();
-});
-
-const app = document.querySelector("#app");
-if (!app) {
-  throw new Error("app not found");
+/**
+ * Set up the app
+ * @private
+ * @throws {Error} app not found
+ */
+function app() {
+  const app = document.querySelector("#app");
+  if (!app) {
+    throw new Error("app not found");
+  }
+  app.innerHTML = `
+    <canvas id="drawArea" class="h-full w-full overflow-hidden"></canvas>
+    <div id="controls" class="absolute left-2 top-2"></div>
+  `;
+  controls();
 }
-app.innerHTML = `
-  <canvas id="drawArea" class="h-full w-full overflow-hidden"></canvas>
-  <div id="controls" class="absolute left-2 top-2"></div>
-`;
 
-const controls = document.querySelector("#controls");
-if (!controls) {
-  throw new Error("controls not found");
-}
-controls.innerHTML = `
+/**
+ * Set up the controls
+ * @private
+ * @throws {Error} controls not found
+ */
+function controls() {
+  const controls = document.querySelector("#controls");
+  if (!controls) {
+    throw new Error("controls not found");
+  }
+  controls.innerHTML = `
   <div class="grid grid-cols-2 gap-2">
     <button id="clearPoints">clear</button>
   </div>
-`;
+    `;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  app();
+  attach();
+});
