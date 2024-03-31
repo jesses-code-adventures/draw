@@ -134,12 +134,11 @@ function controls() {
       return;
     }
     if (e.target.id === "showStrokeColourSelector") {
-      console.log("showStrokeColourSelector pressed");
       strokeColourSelector.setVisibility(!strokeColourSelector.visible);
     }
   });
   controls.innerHTML = `
-  <div class="grid grid-cols-2 gap-2">
+  <div class="grid grid-cols-2 gap-2 w-36">
     <button id="clearPoints">clear</button>
     <div id="strokeButtonAndSelector" class="flex flex-col w-full"></div>
       <button id="showStrokeColourSelector">stroke</button>

@@ -716,6 +716,18 @@ video {
   width: 8rem;
 }
 
+.w-24 {
+  width: 6rem;
+}
+
+.w-48 {
+  width: 12rem;
+}
+
+.w-36 {
+  width: 9rem;
+}
+
 .grow {
   flex-grow: 1;
 }
