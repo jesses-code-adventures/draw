@@ -115,7 +115,6 @@ class App {
       if (!(e.target instanceof HTMLElement)) {
         return;
       }
-      console.log(e.target.id);
       if (e.target.id === "strokeButtonAndSelector-colourSelectorButton") {
         strokeColourSelector.setVisibility(!strokeColourSelector.visible);
       }

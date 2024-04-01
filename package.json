@@ -5,12 +5,13 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "dev": "concurrently \"npm run vite\" \"npm run tailwind\"",
+    "dev": "concurrently \"air main.go\" \"npm run tailwind\"",
     "vite": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "serve": "node server/main.js --watch",
-    "tailwind": "npx tailwindcss -i ./styles/input.css -o ./styles/output.css --watch"
+    "tailwind": "npx tailwindcss -i ./styles/input.css -o ./styles/output.css --watch",
+    "dockerLocal": "docker build --progress=plain --no-cache -t draw . && docker run -p 3000:3000 draw"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.4",

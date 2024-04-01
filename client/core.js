@@ -81,11 +81,13 @@ export class DrawState {
     /** @type {number} */
     this.lineWidth = 5;
     if (darkMode.matches) {
+      console.log("yes dark mode");
       /** @type {Colour} */
       this.strokeColour = new Colour(0, 100, 100, 1);
       /** @type {Colour} */
       this.fillColour = new Colour(0, 100, 100, 1);
     } else {
+      console.log("no dark mode");
       /** @type {Colour} */
       this.strokeColour = new Colour(360, 1, 1, 1);
       /** @type {Colour} */
