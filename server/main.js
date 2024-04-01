@@ -56,7 +56,9 @@ const server = http.createServer((req, response) => {
   }
 
   if (!fs.existsSync(filePath)) {
+    console.log("did not find", filePath);
     filePath = path.join(publicDirectoryPath, req.url);
+    console.log("trying", filePath);
   }
 
   // Infer the content type from the file extension
