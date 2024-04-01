@@ -16,7 +16,7 @@ RUN npm install -g terser
 # Minify all JavaScript files in the directory
 RUN find ./client -name "*.js" -exec echo Minifying {} \; -exec terser {} -o {} \;
 # Gzip all minified JavaScript files
-RUN find ./client -name "*.js" -exec echo Gzipping {} \; -exec gzip -k -f {} \;
+RUN find ./client -name "*.js" -exec echo Gzipping {} \; -exec gzip -f {} \;
 
 FROM alpine:latest
 WORKDIR /root/
