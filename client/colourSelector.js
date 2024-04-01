@@ -221,7 +221,7 @@ export class ColourSelector {
       selectorContainer.hidden = false;
     }
     element.innerHTML = `
-      <img id="${this.elementName}-colourSelectorButton" src="${this.iconLocation}" class="w-8 h-8 text-white dark:bg-white invert" />
+      <img id="${this.elementName}-colourSelectorButton" src="${this.iconLocation}" alt="${this.elementName} Colour Selector Button" class="w-8 h-8 text-white dark:bg-white invert" />
       ${selectorContainer.outerHTML}
     `;
     this.addListeners(); // Has to go here so that the preceding elements have been renderered already
