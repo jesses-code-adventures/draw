@@ -1,13 +1,16 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"path/filepath"
 )
 
 func main() {
 	mux := http.NewServeMux()
+	log.Println("Server started on port 3000")
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Request received: ", r.URL.Path)
 		if r.URL.Path == "/" {
 			http.ServeFile(w, r, filepath.Join("index.html"))
 			return

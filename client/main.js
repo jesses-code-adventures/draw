@@ -134,11 +134,19 @@ class App {
       "strokeButtonAndSelector",
       (colour) => this.drawState.setStrokeColour(colour),
       "stroke_colour_dark.png",
+      this.drawState.strokeColour.hue,
+      this.drawState.strokeColour.saturation,
+      this.drawState.strokeColour.lightness,
+      this.drawState.strokeColour.alpha,
     );
     const fillColourSelector = new ColourSelector(
       "fillButtonAndSelector",
       (colour) => this.drawState.setFillColour(colour),
       "fill_colour_dark.png",
+      this.drawState.fillColour.hue,
+      this.drawState.fillColour.saturation,
+      this.drawState.fillColour.lightness,
+      this.drawState.fillColour.alpha,
     );
     strokeColourSelector.render();
     fillColourSelector.render();

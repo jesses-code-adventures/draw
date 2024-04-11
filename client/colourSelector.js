@@ -11,18 +11,30 @@ export class ColourSelector {
    * @param {string} parent
    * @param {setColourCallback} setColour
    * @param {string} iconLocation
+   * @param {number} initialHue
+   * @param {number} initialSaturation
+   * @param {number} initialLightness
+   * @param {number} initialAlpha
    */
-  constructor(parent, setColour, iconLocation) {
+  constructor(
+    parent,
+    setColour,
+    iconLocation,
+    initialHue,
+    initialSaturation,
+    initialLightness,
+    initialAlpha,
+  ) {
     /** @type {string} */
     this.elementName = parent;
     /** @type {number} */
-    this.selectedHue = 180;
+    this.selectedHue = initialHue;
     /** @type {number} */
-    this.selectedSaturation = 50;
+    this.selectedSaturation = initialSaturation;
     /** @type {number} */
-    this.selectedLightness = 50;
+    this.selectedLightness = initialLightness;
     /** @type {number} */
-    this.selectedAlpha = 1;
+    this.selectedAlpha = initialAlpha;
     /** @type{boolean} */
     this.visible = false;
     /** @type {Colour} */
