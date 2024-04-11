@@ -91,6 +91,8 @@ export class DrawState {
       /** @type {Colour} */
       this.fillColour = new Colour(360, 1, 1, 1);
     }
+    this.setStrokeColour(this.strokeColour);
+    this.setFillColour(this.fillColour);
   }
 
   /**
@@ -136,6 +138,7 @@ export class DrawState {
     );
     this.points.set(point.getKey(), point);
     this.drawOrder.push(point.getKey());
+    this.syncColoursWithPoint(point);
     this.renderPoint(point);
   }
 
@@ -207,7 +210,9 @@ export class DrawState {
     this.ctx.lineTo(point.x, point.y);
     this.ctx.lineJoin = "round";
     this.ctx.lineCap = "round";
-    this.ctx.stroke();
+    if (!point.lineStart) {
+      this.ctx.stroke();
+    }
     if (point.lineEnd) {
       this.ctx.closePath();
     }
