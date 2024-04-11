@@ -8,7 +8,8 @@ import (
 
 func main() {
 	mux := http.NewServeMux()
-	log.Println("Server started on port 3000")
+	PORT := ":3000"
+	log.Println("Server started on port ", PORT)
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Request received: ", r.URL.Path)
 		if r.URL.Path == "/" {
@@ -36,5 +37,5 @@ func main() {
 		}
 		http.NotFound(w, r)
 	})
-	http.ListenAndServe(":3000", mux)
+	http.ListenAndServe(PORT, mux)
 }
