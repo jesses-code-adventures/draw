@@ -11,12 +11,13 @@ FROM node:14-alpine as js-builder
 WORKDIR /app
 # Assuming your JavaScript files are located in /app/client/js
 COPY --from=builder /app/client ./client
-# Install terser for minification
-RUN npm install -g terser
-# Minify all JavaScript files in the directory
-RUN find ./client -name "*.js" -exec echo Minifying {} \; -exec terser {} -o {} \;
-# Gzip all minified JavaScript files
-RUN find ./client -name "*.js" -exec echo Gzipping {} \; -exec gzip -f {} \;
+# # Install terser for minification
+# RUN npm install -g terser
+# # Minify all JavaScript files in the directory
+# RUN find ./client -name "*.js" -exec echo Minifying {} \; -exec terser {} -o {} \;
+# # Gzip all minified JavaScript files
+# RUN find ./client -name "*.js" -exec echo Gzipping {} \; -exec gzip -f {} \;
+# RUN ls
 
 FROM alpine:latest
 WORKDIR /root/
