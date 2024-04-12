@@ -9,7 +9,7 @@ import (
 
 func main() {
 	mux := http.NewServeMux()
-	PORT := ":3002"
+	PORT := ":3000"
 	log.Println("Server started on port ", PORT)
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Request received: ", r.URL.Path)
