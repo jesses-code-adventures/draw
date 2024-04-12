@@ -922,6 +922,14 @@ video {
   vite: html;
 }
 
+.hover\:cursor-pointer:hover {
+  cursor: pointer;
+}
+
+.hover\:cursor-default:hover {
+  cursor: default;
+}
+
 @media (prefers-color-scheme: dark) {
   .dark\:border-white {
     --tw-border-opacity: 1;

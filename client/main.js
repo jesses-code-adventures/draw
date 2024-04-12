@@ -1,6 +1,6 @@
 //@ts-check
 
-import { WindowSize, DrawState } from "./core.js";
+import { WindowSize, DrawState, LineType } from "./core.js";
 import { ColourSelector } from "./colourSelector.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -66,12 +66,14 @@ class App {
           console.log("Not an html element");
           return;
         }
+        // right click for fill
         if (e.target.id === "drawArea") {
           this.drawState.addPoint(e.x, e.y, false, false, true);
         }
         return;
       }
       if (e.target.id === "drawArea") {
+        console.log("got mousedown starting line");
         this.drawState.setIsDrawing(true);
         this.drawState.addPoint(e.x, e.y, true, false, false);
       }
@@ -79,12 +81,9 @@ class App {
         this.drawState.clearPoints();
       }
     });
-    document.addEventListener("mouseup", () => {
+    document.addEventListener("mouseup", (e) => {
       if (this.drawState.isDrawing) {
-        const lastPoint = this.drawState.getLastPoint();
-        if (lastPoint) {
-          lastPoint.setLineEnd(true);
-        }
+        this.drawState.addPoint(e.x, e.y, false, true, false);
         this.drawState.setIsDrawing(false);
       }
     });
@@ -121,13 +120,22 @@ class App {
       if (e.target.id === "fillButtonAndSelector-colourSelectorButton") {
         fillColourSelector.setVisibility(!fillColourSelector.visible);
       }
+      if (e.target.id === "freeOrStraightLineToggle") {
+        if (this.drawState.currentLineType.type === "straight") {
+          this.drawState.currentLineType = new LineType("free");
+        } else {
+          this.drawState.currentLineType = new LineType("straight");
+        }
+        e.target.textContent = this.drawState.currentLineType.type;
+      }
     });
     controls.innerHTML = `
   <div class="grid grid-cols-2 w-24 gap-4">
-    <img id="clearPoints" src="clean_dark.png" alt="clear" class="w-8 h-8 text-white dark:bg-white invert " />
+    <img id="clearPoints" src="clean_dark.png" alt="clear" class="w-8 h-8 text-white dark:bg-white invert" />
     <div id="strokeButtonAndSelector" class="flex flex-row w-full "></div>
     <div id="placeholder" class="">hi</div>
     <div id="fillButtonAndSelector" class="flex flex-row w-full "></div>
+    <div id="freeOrStraightLineToggle" class="flex flex-row w-full hover:cursor-default">${this.drawState.currentLineType.type}</div>
   </div>
     `;
     const strokeColourSelector = new ColourSelector(

@@ -1,4 +1,17 @@
 /**
+ * @param {Colour} colour
+ * @returns Colour
+ */
+export function copyColour(colour) {
+  return new Colour(
+    colour.hue,
+    colour.saturation,
+    colour.lightness,
+    colour.alpha,
+  );
+}
+
+/**
  * Represents a single colour and has a render function  that returns a html element filled with the colour
  * The parent should provide a container for the colour so its size doesn't need to be set here
  */
